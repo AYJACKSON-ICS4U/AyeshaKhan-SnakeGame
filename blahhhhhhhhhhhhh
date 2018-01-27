@@ -1,0 +1,234 @@
+var Spaceship = function(x,y) {
+this.position = new PVector(200, 200); //Starts off in the middle of the screen
+this.velocity = new PVector(0,0); ///setting velocity equal to 0
+this.acceleration = new PVector(0,0); /// setting the starting acceleration to zero, so it doesn't move right off the bat
+this.angle = 0; //starting angle is 0
+};
+
+
+Spaceship.prototype.update = function() {
+this.velocity.add(this.acceleration);// increase velocity
+this.velocity.limit(5);//limit velocity
+this.position.add(this.velocity);///moving the ship
+this.acceleration.mult(0);///setting acceleration to zero so that it doesn't keep getting faster
+};
+
+Spaceship.prototype.applyForce = function(force) {
+this.acceleration.add(force); ///adding the force to the acceleration
+};
+
+Spaceship.prototype.checkEdges = function() {
+if(this.position.y < 0){ ///checking edges, if exceeds it then reset
+this.position.y = height;
+
+} else if(this.position.y > height) {
+this.position.y = 0; //same as above exceot in reverse
+
+}
+if(this.position.x < 0) {
+this.position.x = width; ///same as y except for x
+
+} else if(this.position.x > width) {
+this.position.x = 0;
+
+}
+
+};
+
+Spaceship.prototype.display = function() {
+pushMatrix(); /// pushing the variable into the matrix stack
+translate(this.position.x,this.position.y); /// setting the translation factor
+rotate(this.angle); // using the variable angle to rotate
+
+// Create the spaceship itself
+fill(0, 33, 82);
+rectMode(CENTER); // set the point of origin to the center
+rect(0,0,10,5);
+fill(171, 171, 171);
+triangle(8,0,-8,0,0,-16);
+
+popMatrix(); //going to the previously saved values
+
+};
+
+var clouds = function()
+{
+    
+    noStroke(); 
+    fill(250, 250, 250);
+    
+    //cloud 1
+    ellipse(100, 100, 30, 20);
+    ellipse(133, 100, 30, 20);
+    ellipse(116, 100, 40, 29);
+    
+    ///cloud 2
+    ellipse(230, 164, 30, 20);
+    ellipse(270, 164, 30, 20);
+    ellipse(250, 164, 40, 29);
+    
+    ///cloud 3
+    ellipse(93, 200, 30, 20);
+    ellipse(135, 200, 30, 20);
+    ellipse(115, 200, 40, 29);
+    
+    ///cloud 4
+    ellipse(274, 50, 30, 20);
+    ellipse(316, 50, 30, 20);
+    ellipse(294, 50, 40, 29);
+    
+    ///cloud 5
+    ellipse(274, 300, 30, 20);
+    ellipse(316, 300, 30, 20);
+    ellipse(294, 300, 40, 29);
+    
+    ///cloud 6
+    ellipse(89, 350, 30, 20);
+    ellipse(128, 350, 30, 20);
+    ellipse(108, 350, 40, 29);
+    
+};
+
+
+
+
+
+var player1 = new Spaceship(200,200); ///set player1 equal to the spaceship
+
+
+
+/////////Moving object type////////////////////////////////////////////////////////////////
+var Move = function(p, l, r, g){
+    this.p = new PVector (width/2,height/2); //position
+    this.l = -10; //lift
+    this.g = 2; //gravity
+    this.r = 30;
+};
+
+
+Move.prototype.update = function()
+{
+   
+   ////creature 1 and 2///
+    this.p.y += this.g; /// adding the velocity to the position 
+    
+};
+
+////////////////////////////////////////////////////////////
+
+var bm = function(p, l, r, g)
+{
+    
+    Move.call(this, p, l, r, g); // call base
+    
+};
+
+
+bm.prototype = Object.create(Move.prototype);
+
+
+
+//displays image 
+bm.prototype.display = function()
+{
+    fill(5, 5, 5);
+    ellipse(this.p.x, this.p.y, this.r, this.r);
+    
+};
+
+bm.prototype.ce = function()
+{
+    if ( this.p.y > height)
+        {
+            this.g *= -1;
+        }
+        
+    if (this.p.y < 0)
+        {
+            this.g*=-1;    
+        }
+};
+
+
+
+var b = [];
+b.push(new bm());
+
+
+player1.prototype.crosses = function(b){
+   if (b.p.y === player1.p.y){
+        if (b.p.x === this.x ){
+      return true;
+    }
+   }
+};
+
+
+
+
+
+
+var draw = function() { //draw function
+
+background(17, 158, 186);
+ 
+
+
+
+// if these keys are pressed then chenge the angles
+keyPressed = function() {
+if(keyCode === LEFT) {
+player1.angle-=10;
+} else if(keyCode === RIGHT) {
+player1.angle+=10;
+}
+};
+
+
+/// creating a thrust var
+var thrust = new PVector(0,-5);
+var nothing = new PVector(0,0);
+thrust.rotate(player1.angle); 
+
+//if key is pressed then set force equal to force 
+if(keyIsPressed && keyCode === UP){
+player1.applyForce(thrust);
+}
+else if (keyIsPressed && keyCode === DOWN)
+{
+    
+    player1.velocity = 0;
+}
+
+
+clouds();
+
+
+
+/// calling the functions
+  for (var i = b.length-1; i >=0; i--){
+    b[i].display();
+    b[i].update();
+    
+   if (player1.crosses(b))
+{
+    b.splice(i, 1);
+} 
+    
+  if (frameCount % 100 === 0){
+    b.push(new bm());
+  }
+  
+  }
+player1.update();
+player1.checkEdges();
+player1.display(); 
+
+
+ 
+
+
+};
+
+
+ 
